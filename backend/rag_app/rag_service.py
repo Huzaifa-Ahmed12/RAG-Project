@@ -133,6 +133,13 @@ def get_answer(query, user):
     return response.content, matched_doc_id
 
 
-def delete_document(doc_id):
+def delete_document(doc_id, user):
+    # Only delete if this document actually belongs to this user
+    doc = Document.objects.filter(doc_id=doc_id, owner=user).first()
+    if not doc:
+        return False
+
     vector_store._collection.delete(where={"doc_id": doc_id})  # remove from Chroma
-    Document.objects.filter(doc_id=doc_id).delete()             # remove from PostgreSQL
+    doc.delete()  # remove from PostgreSQL
+
+    return True       

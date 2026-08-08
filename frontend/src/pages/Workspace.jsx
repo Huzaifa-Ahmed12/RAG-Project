@@ -7,6 +7,8 @@ const API_BASE = "http://localhost:8000/api";
 function Workspace() {
   const [files, setFiles] = useState([]);
   const [documents, setDocuments] = useState([]);
+  const [conversations, setConversations] = useState([]);
+  const [currentConversationId, setCurrentConversationId] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [progressText, setProgressText] = useState("");
@@ -16,6 +18,8 @@ function Workspace() {
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [docToDelete, setDocToDelete] = useState(null);
+  const [convToDelete, setConvToDelete] = useState(null);
 
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
@@ -23,20 +27,17 @@ function Workspace() {
   const username = localStorage.getItem("username");
   const token = localStorage.getItem("access_token");
 
-  // Helper: attach auth header to every request
   const authHeaders = (extra = {}) => ({
     Authorization: `Bearer ${token}`,
     ...extra,
   });
 
-  // Used for automatic logout (e.g. expired token) — no confirmation needed
   const handleLogout = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("username");
     navigate("/login");
   };
 
-  // Used when the user manually clicks Logout and confirms the modal
   const confirmLogout = () => {
     handleLogout();
     setShowLogoutConfirm(false);
@@ -46,25 +47,99 @@ function Workspace() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Load existing documents when the workspace first opens
   useEffect(() => {
-    const fetchDocuments = async () => {
+    const fetchInitialData = async () => {
       try {
-        const res = await fetch(`${API_BASE}/documents/`, {
-          headers: authHeaders(),
-        });
-        if (res.status === 401) {
+        const [docsRes, convRes] = await Promise.all([
+          fetch(`${API_BASE}/documents/`, { headers: authHeaders() }),
+          fetch(`${API_BASE}/conversations/`, { headers: authHeaders() }),
+        ]);
+
+        if (docsRes.status === 401 || convRes.status === 401) {
           handleLogout();
           return;
         }
-        const data = await res.json();
-        setDocuments(data);
+
+        const docsData = await docsRes.json();
+        const convData = await convRes.json();
+
+        setDocuments(docsData);
+        setConversations(convData);
+
+        if (convData.length > 0) {
+          await loadConversation(convData[0].id);
+        }
       } catch (err) {
-        console.error("Failed to load documents:", err);
+        console.error("Failed to load initial data:", err);
       }
     };
-    fetchDocuments();
+    fetchInitialData();
   }, []);
+
+  const loadConversation = async (conversationId) => {
+    try {
+      const res = await fetch(`${API_BASE}/conversations/${conversationId}/messages/`, {
+        headers: authHeaders(),
+      });
+      if (res.status === 401) {
+        handleLogout();
+        return;
+      }
+      const data = await res.json();
+
+      if (data.length === 0) {
+        setMessages([{ role: "assistant", content: "Hi! Upload a PDF and ask me anything about it 📖" }]);
+      } else {
+        setMessages(data.map((m) => ({ role: m.role, content: m.content, source: m.source })));
+      }
+      setCurrentConversationId(conversationId);
+    } catch (err) {
+      console.error("Failed to load conversation:", err);
+    }
+  };
+
+  const startNewChat = () => {
+    setCurrentConversationId(null);
+    setMessages([{ role: "assistant", content: "Hi! Upload a PDF and ask me anything about it 📖" }]);
+  };
+
+  const refreshConversations = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/conversations/`, { headers: authHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        setConversations(data);
+      }
+    } catch (err) {
+      console.error("Failed to refresh conversations:", err);
+    }
+  };
+
+  // ---- Delete a conversation (removes from PostgreSQL + admin panel) ----
+  const handleDeleteConversation = async (conversationId) => {
+    try {
+      const res = await fetch(`${API_BASE}/conversations/${conversationId}/`, {
+        method: "DELETE",
+        headers: authHeaders(),
+      });
+
+      if (res.status === 401) {
+        handleLogout();
+        return;
+      }
+
+      if (res.ok) {
+        setConversations((prev) => prev.filter((c) => c.id !== conversationId));
+
+        // If the deleted conversation was the one currently open, reset to a fresh chat
+        if (conversationId === currentConversationId) {
+          startNewChat();
+        }
+      }
+    } catch (err) {
+      console.error("Failed to delete conversation:", err);
+    }
+  };
 
   const handleFileSelect = (e) => {
     const selected = Array.from(e.target.files);
@@ -101,7 +176,13 @@ function Workspace() {
 
         const data = await res.json();
         setProgressText(`Processed ${file.name}`);
-        setDocuments((prev) => [...prev, data]);
+        // Store only filename/doc_id for the sidebar card — summary stays in the database only
+        setDocuments((prev) => [...prev, { doc_id: data.doc_id, filename: data.filename }]);
+
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: `📄 Document processed and stored: ${data.filename}` },
+        ]);
       } catch (err) {
         console.error("Upload failed:", err);
       }
@@ -118,6 +199,26 @@ function Workspace() {
     }, 1000);
   };
 
+  const handleDeleteDocument = async (docId) => {
+    try {
+      const res = await fetch(`${API_BASE}/documents/${docId}/`, {
+        method: "DELETE",
+        headers: authHeaders(),
+      });
+
+      if (res.status === 401) {
+        handleLogout();
+        return;
+      }
+
+      if (res.ok) {
+        setDocuments((prev) => prev.filter((doc) => doc.doc_id !== docId));
+      }
+    } catch (err) {
+      console.error("Failed to delete document:", err);
+    }
+  };
+
   const handleSend = async () => {
     if (!input.trim()) return;
 
@@ -130,7 +231,10 @@ function Workspace() {
       const res = await fetch(`${API_BASE}/chat/`, {
         method: "POST",
         headers: authHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify({ question: userMessage.content }),
+        body: JSON.stringify({
+          question: userMessage.content,
+          conversation_id: currentConversationId,
+        }),
       });
 
       if (res.status === 401) {
@@ -144,6 +248,11 @@ function Workspace() {
         ...prev,
         { role: "assistant", content: data.answer, source: data.source_filename },
       ]);
+
+      if (!currentConversationId && data.conversation_id) {
+        setCurrentConversationId(data.conversation_id);
+        refreshConversations();
+      }
     } catch (err) {
       setMessages((prev) => [
         ...prev,
@@ -203,15 +312,60 @@ function Workspace() {
         )}
 
         <div className="section-label">Your Documents</div>
-        {documents.length === 0 && (
-          <div className="sidebar-subtitle">No documents uploaded yet.</div>
-        )}
-        {documents.map((doc, idx) => (
-          <div className="doc-card" key={idx}>
-            <b>{doc.filename}</b>
-            <p>{doc.summary}</p>
-          </div>
-        ))}
+        <div className="scroll-section docs-scroll">
+          {documents.length === 0 && (
+            <div className="sidebar-subtitle">No documents uploaded yet.</div>
+          )}
+          {documents.map((doc, idx) => (
+            <div className="doc-card" key={idx}>
+              <div className="doc-card-header">
+                <b>{doc.filename}</b>
+                <button
+                  className="doc-delete-btn"
+                  onClick={() => setDocToDelete(doc.doc_id)}
+                  title="Delete document"
+                >
+                  🗑️
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="section-label conversations-label">
+          Chats
+          <button className="new-chat-btn" onClick={startNewChat} title="Start new chat">
+            + New
+          </button>
+        </div>
+        <div className="scroll-section chats-scroll">
+          {conversations.length === 0 && (
+            <div className="sidebar-subtitle">No conversations yet.</div>
+          )}
+          {conversations.map((conv) => (
+            <div
+              key={conv.id}
+              className={`conversation-item-wrap ${conv.id === currentConversationId ? "active" : ""}`}
+            >
+              <button
+                className="conversation-item"
+                onClick={() => loadConversation(conv.id)}
+              >
+                {conv.title}
+              </button>
+              <button
+                className="conv-delete-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setConvToDelete(conv.id);
+                }}
+                title="Delete conversation"
+              >
+                🗑️
+              </button>
+            </div>
+          ))}
+        </div>
 
         <button className="logout-btn" onClick={() => setShowLogoutConfirm(true)}>
           Logout
@@ -229,7 +383,7 @@ function Workspace() {
           {messages.map((msg, idx) => (
             <div className={`message-row ${msg.role}`} key={idx}>
               <div className={`avatar ${msg.role}`}>
-                {msg.role === "user" ? "🧑‍💻" : "📚"}
+                {msg.role === "user" ? username.charAt(0).toUpperCase() : "AI"}
               </div>
               <div>
                 <div className="message-bubble">{msg.content}</div>
@@ -241,7 +395,7 @@ function Workspace() {
           ))}
           {thinking && (
             <div className="message-row assistant">
-              <div className="avatar assistant">📚</div>
+              <div className="avatar assistant">AI</div>
               <div className="message-bubble">Thinking...</div>
             </div>
           )}
@@ -272,6 +426,54 @@ function Workspace() {
               </button>
               <button className="modal-btn-confirm" onClick={confirmLogout}>
                 Yes, Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE DOCUMENT CONFIRMATION MODAL */}
+      {docToDelete && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <h3>Delete document?</h3>
+            <p>This will permanently remove the document and all its data. This can't be undone.</p>
+            <div className="modal-actions">
+              <button className="modal-btn-cancel" onClick={() => setDocToDelete(null)}>
+                Cancel
+              </button>
+              <button
+                className="modal-btn-confirm"
+                onClick={async () => {
+                  await handleDeleteDocument(docToDelete);
+                  setDocToDelete(null);
+                }}
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE CONVERSATION CONFIRMATION MODAL */}
+      {convToDelete && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <h3>Delete conversation?</h3>
+            <p>This chat and all its messages will be permanently deleted. This can't be undone.</p>
+            <div className="modal-actions">
+              <button className="modal-btn-cancel" onClick={() => setConvToDelete(null)}>
+                Cancel
+              </button>
+              <button
+                className="modal-btn-confirm"
+                onClick={async () => {
+                  await handleDeleteConversation(convToDelete);
+                  setConvToDelete(null);
+                }}
+              >
+                Yes, Delete
               </button>
             </div>
           </div>

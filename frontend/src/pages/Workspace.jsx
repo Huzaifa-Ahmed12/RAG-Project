@@ -1,8 +1,17 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  Menu, X, FileText, Send, Trash2, LogOut, Plus,
+  Upload, Sparkles, ShieldAlert, Paperclip, Zap
+} from "lucide-react";
 import "../App.css";
 
 const API_BASE = "http://localhost:8000/api";
+
+const SUGGESTIONS = [
+  { label: "Summarize Key Metrics", icon: Sparkles },
+  { label: "Identify Risks", icon: ShieldAlert },
+];
 
 function Workspace() {
   const [files, setFiles] = useState([]);
@@ -13,13 +22,14 @@ function Workspace() {
   const [progress, setProgress] = useState(0);
   const [progressText, setProgressText] = useState("");
   const [messages, setMessages] = useState([
-    { role: "assistant", content: "Hi! Upload a PDF and ask me anything about it 📖" }
+    { role: "assistant", content: "Hi! Upload a PDF and ask me anything about it." }
   ]);
   const [input, setInput] = useState("");
   const [thinking, setThinking] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [docToDelete, setDocToDelete] = useState(null);
   const [convToDelete, setConvToDelete] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
@@ -88,7 +98,7 @@ function Workspace() {
       const data = await res.json();
 
       if (data.length === 0) {
-        setMessages([{ role: "assistant", content: "Hi! Upload a PDF and ask me anything about it 📖" }]);
+        setMessages([{ role: "assistant", content: "Hi! Upload a PDF and ask me anything about it." }]);
       } else {
         setMessages(data.map((m) => ({ role: m.role, content: m.content, source: m.source })));
       }
@@ -100,7 +110,7 @@ function Workspace() {
 
   const startNewChat = () => {
     setCurrentConversationId(null);
-    setMessages([{ role: "assistant", content: "Hi! Upload a PDF and ask me anything about it 📖" }]);
+    setMessages([{ role: "assistant", content: "Hi! Upload a PDF and ask me anything about it." }]);
   };
 
   const refreshConversations = async () => {
@@ -115,7 +125,6 @@ function Workspace() {
     }
   };
 
-  // ---- Delete a conversation (removes from PostgreSQL + admin panel) ----
   const handleDeleteConversation = async (conversationId) => {
     try {
       const res = await fetch(`${API_BASE}/conversations/${conversationId}/`, {
@@ -130,8 +139,6 @@ function Workspace() {
 
       if (res.ok) {
         setConversations((prev) => prev.filter((c) => c.id !== conversationId));
-
-        // If the deleted conversation was the one currently open, reset to a fresh chat
         if (conversationId === currentConversationId) {
           startNewChat();
         }
@@ -176,12 +183,11 @@ function Workspace() {
 
         const data = await res.json();
         setProgressText(`Processed ${file.name}`);
-        // Store only filename/doc_id for the sidebar card — summary stays in the database only
         setDocuments((prev) => [...prev, { doc_id: data.doc_id, filename: data.filename }]);
 
         setMessages((prev) => [
           ...prev,
-          { role: "assistant", content: `📄 Document processed and stored: ${data.filename}` },
+          { role: "assistant", content: `Document processed and stored: ${data.filename}`, isUpload: true, filename: data.filename },
         ]);
       } catch (err) {
         console.error("Upload failed:", err);
@@ -219,10 +225,10 @@ function Workspace() {
     }
   };
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
+  const sendMessage = async (text) => {
+    if (!text.trim()) return;
 
-    const userMessage = { role: "user", content: input };
+    const userMessage = { role: "user", content: text };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setThinking(true);
@@ -263,15 +269,23 @@ function Workspace() {
     }
   };
 
+  const handleSend = () => sendMessage(input);
   const handleKeyDown = (e) => {
     if (e.key === "Enter") handleSend();
   };
 
   return (
-    <div className="app-container">
+    <div className={`app-container ${sidebarOpen ? "" : "sidebar-collapsed"}`}>
       {/* SIDEBAR */}
       <div className="sidebar">
-        <div className="sidebar-title">📚 RAG Assistant</div>
+        <div className="sidebar-top">
+          <div className="brand-name-mini">
+            CIR<span className="brand-accent">RUS</span>
+          </div>
+          <button className="icon-btn sidebar-close-btn" onClick={() => setSidebarOpen(false)}>
+            <X size={16} />
+          </button>
+        </div>
         <div className="sidebar-subtitle">Signed in as {username}</div>
 
         <label className="upload-box">
@@ -282,6 +296,7 @@ function Workspace() {
             hidden
             onChange={handleFileSelect}
           />
+          <Upload size={18} className="upload-icon" />
           <p>Drop PDFs here or <span>browse</span></p>
         </label>
 
@@ -289,7 +304,7 @@ function Workspace() {
           <div className="file-list">
             {files.map((file, idx) => (
               <div className="file-chip" key={idx}>
-                {file.name}
+                <span>{file.name}</span>
                 <button onClick={() => removeFile(idx)}>×</button>
               </div>
             ))}
@@ -318,16 +333,20 @@ function Workspace() {
           )}
           {documents.map((doc, idx) => (
             <div className="doc-card" key={idx}>
-              <div className="doc-card-header">
-                <b>{doc.filename}</b>
-                <button
-                  className="doc-delete-btn"
-                  onClick={() => setDocToDelete(doc.doc_id)}
-                  title="Delete document"
-                >
-                  🗑️
-                </button>
+              <div className="doc-card-icon">
+                <FileText size={16} />
               </div>
+              <div className="doc-card-body">
+                <b>{doc.filename}</b>
+                <span className="doc-status">Analyzed</span>
+              </div>
+              <button
+                className="doc-delete-btn"
+                onClick={() => setDocToDelete(doc.doc_id)}
+                title="Delete document"
+              >
+                <Trash2 size={14} />
+              </button>
             </div>
           ))}
         </div>
@@ -335,7 +354,7 @@ function Workspace() {
         <div className="section-label conversations-label">
           Chats
           <button className="new-chat-btn" onClick={startNewChat} title="Start new chat">
-            + New
+            <Plus size={13} /> New
           </button>
         </div>
         <div className="scroll-section chats-scroll">
@@ -361,56 +380,100 @@ function Workspace() {
                 }}
                 title="Delete conversation"
               >
-                🗑️
+                <Trash2 size={13} />
               </button>
             </div>
           ))}
         </div>
 
         <button className="logout-btn" onClick={() => setShowLogoutConfirm(true)}>
-          Logout
+          <LogOut size={15} /> Logout
         </button>
       </div>
+
+      {/* SIDEBAR OVERLAY (mobile) */}
+      {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
 
       {/* CHAT AREA */}
       <div className="chat-area">
         <div className="chat-header">
-          <h2>Chat</h2>
-          <p>Ask a question — only the relevant document is searched</p>
+          {!sidebarOpen && (
+            <button className="icon-btn menu-toggle-btn" onClick={() => setSidebarOpen(true)}>
+              <Menu size={18} />
+            </button>
+          )}
+          <div>
+            <h2>Cirrus AI</h2>
+            <p>Ask a question — only the relevant document is searched</p>
+          </div>
         </div>
 
         <div className="messages-container">
           {messages.map((msg, idx) => (
             <div className={`message-row ${msg.role}`} key={idx}>
               <div className={`avatar ${msg.role}`}>
-                {msg.role === "user" ? username.charAt(0).toUpperCase() : "AI"}
+                {msg.role === "user" ? username.charAt(0).toUpperCase() : <Zap size={14} />}
               </div>
-              <div>
-                <div className="message-bubble">{msg.content}</div>
+              <div className="message-col">
+                <div className={`message-bubble ${msg.isUpload ? "message-bubble-upload" : ""}`}>
+                  {msg.isUpload && <FileText size={15} className="upload-msg-icon" />}
+                  {msg.content}
+                </div>
                 {msg.source && (
-                  <div className="source-tag">📄 Answered from: {msg.source}</div>
+                  <div className="source-tag">
+                    <FileText size={12} /> Answered from: {msg.source}
+                  </div>
+                )}
+                {idx === 0 && msg.role === "assistant" && documents.length > 0 && (
+                  <div className="suggestion-chips">
+                    {SUGGESTIONS.map((s, i) => (
+                      <button
+                        key={i}
+                        className="suggestion-chip"
+                        onClick={() => sendMessage(s.label)}
+                      >
+                        <s.icon size={13} /> {s.label}
+                      </button>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
           ))}
           {thinking && (
             <div className="message-row assistant">
-              <div className="avatar assistant">AI</div>
-              <div className="message-bubble">Thinking...</div>
+              <div className="avatar assistant"><Zap size={14} /></div>
+              <div className="message-bubble typing-bubble">
+                <span className="typing-dot" />
+                <span className="typing-dot" />
+                <span className="typing-dot" />
+              </div>
             </div>
           )}
           <div ref={messagesEndRef} />
         </div>
 
         <div className="input-area">
-          <input
-            type="text"
-            placeholder="Ask a question about your uploaded documents..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-          <button className="send-btn" onClick={handleSend}>➤</button>
+          <div className="input-pills">
+            <button className="pill-btn" type="button">
+              <Zap size={13} /> Add Action
+            </button>
+            <button className="pill-btn" type="button">
+              <Paperclip size={13} /> Add Source
+            </button>
+          </div>
+          <div className="input-row">
+            <input
+              type="text"
+              placeholder="Ask about your documents..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+            <button className="send-btn" onClick={handleSend}>
+              <Send size={16} />
+            </button>
+          </div>
         </div>
       </div>
 

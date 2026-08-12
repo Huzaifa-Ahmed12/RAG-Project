@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from pgvector.django import VectorField
 import uuid
 
 
@@ -18,6 +19,18 @@ class Document(models.Model):
         return self.filename
 
 
+class Chunk(models.Model):
+    document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name="chunks")
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="chunks")
+    content = models.TextField()
+    embedding = VectorField(dimensions=384)  # all-MiniLM-L6-v2 = 384 dims
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        preview = self.content[:40] + "..." if len(self.content) > 40 else self.content
+        return f"{self.document.doc_id} | {preview}"
+
+
 class Conversation(models.Model):
     title = models.CharField(max_length=255, default="New Conversation")
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="conversations")
@@ -25,6 +38,8 @@ class Conversation(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.owner.username})"
+
+
 class Message(models.Model):
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="messages")
     role = models.CharField(max_length=20)

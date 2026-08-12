@@ -1,18 +1,14 @@
 import os
 import uuid
+from pgvector.django import CosineDistance
+from sentence_transformers import SentenceTransformer
 from langchain_community.document_loaders import PDFPlumberLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_chroma import Chroma
 from langchain_mistralai import ChatMistralAI
 from langchain_core.prompts import ChatPromptTemplate
-from .models import Document
+from .models import Document, Chunk
 
-embeddings_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-vector_store = Chroma(
-    embedding_function=embeddings_model,
-    persist_directory="Chroma_db"
-)
+embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 llm = ChatMistralAI(model="mistral-small-2506")
 
 system = """You are a helpful assistant.
@@ -33,6 +29,10 @@ def is_greeting(query):
 
 def generate_doc_id():
     return uuid.uuid4().hex[:8]
+
+
+def embed_text(text):
+    return embedding_model.encode(text).tolist()
 
 
 def generate_summary(chunks):
@@ -59,16 +59,26 @@ def process_pdf(pdf_path, filename, user):
     chunks = load_and_chunk(pdf_path, doc_id)
     summary = generate_summary(chunks)
 
-    for c in chunks:
-        c.metadata["user_id"] = user.id   # tag chunks with the owner
+    document = Document.objects.create(
+        doc_id=doc_id, filename=filename, summary=summary, owner=user
+    )
 
-    vector_store.add_documents(chunks)
-    doc = Document.objects.create(doc_id=doc_id, filename=filename, summary=summary, owner=user)
-    return doc
+    chunk_objects = [
+        Chunk(
+            document=document,
+            owner=user,
+            content=c.page_content,
+            embedding=embed_text(c.page_content),
+        )
+        for c in chunks
+    ]
+    Chunk.objects.bulk_create(chunk_objects)
+
+    return document
 
 
 def route_query(query, user):
-    documents = Document.objects.filter(owner=user)   # scoped to this user only
+    documents = Document.objects.filter(owner=user)
     docs_text = " ".join([f"{d.doc_id}:{d.summary}" for d in documents])
 
     routing_prompt = f"""Document Available: {docs_text}
@@ -79,7 +89,6 @@ def route_query(query, user):
 
 
 def is_casual_message(query):
-    """Ask the LLM whether this is a greeting/casual message or a real document question."""
     classification_prompt = f"""Classify the following user message into exactly one category:
 - "casual" — greetings, small talk, thanks, goodbyes, or anything not asking about document content
 - "question" — a genuine question that requires searching document content
@@ -93,7 +102,6 @@ Reply with only one word: casual or question."""
 
 
 def generate_casual_reply(query):
-    """Let the LLM generate a natural, friendly reply for greetings/small talk."""
     casual_prompt = f"""You are a friendly assistant for a document Q&A app.
 The user sent a casual message (not a document question): "{query}"
 
@@ -113,20 +121,18 @@ def get_answer(query, user):
         return "No documents have been uploaded yet. Please upload a PDF first.", None
 
     matched_doc_id = route_query(query, user)
+    query_embedding = embed_text(query)
 
-    retriever = vector_store.as_retriever(
-        search_type='mmr',
-        search_kwargs={
-            "k": 8, "fetch_k": 12, "lambda_mult": 0.5,
-            "filter": {"doc_id": matched_doc_id}
-        }
+    chunks = (
+        Chunk.objects
+        .filter(owner=user, document__doc_id=matched_doc_id)
+        .order_by(CosineDistance("embedding", query_embedding))[:8]
     )
-    docs = retriever.invoke(query)
 
-    if not docs:
+    if not chunks:
         return "I couldn't find that in the document.", matched_doc_id
 
-    context = " ".join([d.page_content for d in docs])
+    context = " ".join([c.content for c in chunks])
     final_prompt = prompt.invoke({"context": context, "question": query})
     response = llm.invoke(final_prompt)
 
@@ -134,12 +140,9 @@ def get_answer(query, user):
 
 
 def delete_document(doc_id, user):
-    # Only delete if this document actually belongs to this user
     doc = Document.objects.filter(doc_id=doc_id, owner=user).first()
     if not doc:
         return False
 
-    vector_store._collection.delete(where={"doc_id": doc_id})  # remove from Chroma
-    doc.delete()  # remove from PostgreSQL
-
-    return True       
+    doc.delete()  # cascades: deletes Document row + all its Chunk rows in Postgres
+    return True

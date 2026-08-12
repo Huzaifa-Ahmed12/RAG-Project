@@ -1,202 +1,156 @@
-.split-container {
-  display: flex;
+.centered-container {
   min-height: 100vh;
-}
-
-/* ---------- REVERSED LAYOUT (Signup) ---------- */
-.split-container.reverse {
-  flex-direction: row-reverse;
-}
-
-/* ---------- LEFT PANEL (form) ---------- */
-.split-left {
-  width: 42%;
-  background-color: #0F172A;
+  background: radial-gradient(circle at top, #10192e 0%, #0a1120 55%, #060a14 100%);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: 40px 20px;
 }
 
-.split-form-wrap {
-  width: 100%;
-  max-width: 360px;
+/* ---------- BRAND ---------- */
+.brand-block {
+  text-align: center;
+  margin-bottom: 24px;
 }
 
-.brand-mark {
-  color: #14B8A6;
-  font-weight: 700;
-  font-size: 1rem;
-  margin-bottom: 32px;
-}
-
-.split-title {
+.brand-name {
+  font-size: 1.9rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
   color: #F8FAFC;
-  font-size: 1.8rem;
+  text-transform: uppercase;
+}
+
+.brand-name-solid {
+  color: #14B8A6;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-size: 2rem;
+}
+
+.brand-accent {
+  color: #14B8A6;
+}
+
+.brand-tagline {
+  margin-top: 6px;
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  color: rgba(248, 250, 252, 0.4);
+  text-transform: uppercase;
+}
+
+/* ---------- CARD ---------- */
+.centered-card {
+  width: 100%;
+  max-width: 380px;
+  background: linear-gradient(180deg, rgba(20, 184, 166, 0.06), rgba(15, 23, 42, 0) 40%), #0d1526;
+  border: 1px solid rgba(20, 184, 166, 0.25);
+  border-radius: 18px;
+  padding: 32px;
+  box-shadow: 0 0 0 1px rgba(20, 184, 166, 0.05), 0 20px 60px -20px rgba(0, 0, 0, 0.6);
+}
+
+.card-title {
+  color: #F8FAFC;
+  font-size: 1.3rem;
   font-weight: 700;
-  margin-bottom: 4px;
+  margin: 0 0 4px 0;
 }
 
-.split-subtitle {
-  color: rgba(248, 250, 252, 0.5);
-  font-size: 0.9rem;
-  margin-bottom: 28px;
+.card-subtitle {
+  color: rgba(248, 250, 252, 0.45);
+  font-size: 0.82rem;
+  margin: 0 0 22px 0;
 }
 
-.split-form-wrap label {
+.centered-card label {
   display: block;
-  color: rgba(248, 250, 252, 0.7);
-  font-size: 0.8rem;
+  color: rgba(248, 250, 252, 0.65);
+  font-size: 0.78rem;
   font-weight: 600;
   margin-bottom: 6px;
   margin-top: 16px;
 }
 
-.split-form-wrap input[type="text"],
-.split-form-wrap input[type="password"],
-.split-form-wrap input[type="email"] {
-  width: 100%;
-  padding: 12px 14px;
-  border-radius: 10px;
-  border: 1px solid rgba(248, 250, 252, 0.15);
-  background-color: rgba(248, 250, 252, 0.05);
-  color: #F8FAFC;
-  font-size: 0.9rem;
-  outline: none;
-  transition: border-color 0.15s;
+.centered-card label:first-of-type,
+.centered-card .label-row {
+  margin-top: 0;
 }
 
-.split-form-wrap input::placeholder {
-  color: rgba(248, 250, 252, 0.35);
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
 }
 
-.split-form-wrap input:focus {
-  border-color: #14B8A6;
+.label-row label {
+  margin: 0;
 }
 
-.password-field {
+.forgot-link {
+  font-size: 0.75rem;
+  color: #14B8A6;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* ---------- INPUTS WITH ICON ---------- */
+.input-icon-wrap {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
-.password-field input {
+.field-icon {
+  position: absolute;
+  left: 13px;
+  color: rgba(248, 250, 252, 0.35);
+  pointer-events: none;
+}
+
+.input-icon-wrap input {
   width: 100%;
-  padding-right: 42px;
+  padding: 12px 14px 12px 38px;
+  border-radius: 10px;
+  border: 1px solid rgba(248, 250, 252, 0.12);
+  background-color: rgba(248, 250, 252, 0.04);
+  color: #F8FAFC;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.input-icon-wrap input::placeholder {
+  color: rgba(248, 250, 252, 0.3);
+}
+
+.input-icon-wrap input:focus {
+  border-color: #14B8A6;
+  background-color: rgba(20, 184, 166, 0.05);
 }
 
 .toggle-password {
   position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
+  right: 12px;
   background: none;
   border: none;
   cursor: pointer;
-  opacity: 0.6;
-  color: #F8FAFC;
+  color: rgba(248, 250, 252, 0.4);
   display: flex;
   align-items: center;
   padding: 4px;
 }
 
 .toggle-password:hover {
-  opacity: 1;
   color: #14B8A6;
 }
 
-.form-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 16px;
-  font-size: 0.8rem;
-}
-
-.forgot-link {
-  color: #14B8A6;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.split-btn {
-  width: 100%;
-  background-color: #14B8A6;
-  color: #0F172A;
-  border: none;
-  padding: 13px;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 0.95rem;
-  cursor: pointer;
-  margin-top: 24px;
-  transition: 0.2s;
-}
-
-.split-btn:hover {
-  background-color: #0d9488;
-  color: #F8FAFC;
-}
-
-.split-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.split-switch {
-  text-align: center;
-  margin-top: 20px;
-  font-size: 0.85rem;
-  color: rgba(248, 250, 252, 0.5);
-}
-
-.split-switch a {
-  color: #14B8A6;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.auth-error {
-  background-color: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-  padding: 10px 14px;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  margin-bottom: 6px;
-}
-
-.auth-inline-link {
-  color: #f87171;
-  font-weight: 700;
-  text-decoration: underline;
-}
-
-.spinner {
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  border: 3px solid rgba(15, 23, 42, 0.2);
-  border-top-color: #0F172A;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* ---------- EMAIL FIELD WITH VALIDATION ICON (Signup) ---------- */
-.input-with-icon {
-  position: relative;
-}
-
-.input-with-icon input {
-  padding-right: 38px;
-}
-
-.input-icon {
+.input-status-icon {
   position: absolute;
   right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
   display: flex;
   align-items: center;
 }
@@ -215,7 +169,7 @@
   margin-top: 4px;
 }
 
-/* ---------- PASSWORD STRENGTH METER (Signup) ---------- */
+/* ---------- PASSWORD STRENGTH ---------- */
 .strength-meter {
   display: flex;
   align-items: center;
@@ -251,16 +205,17 @@
 .strength-label.medium { color: #fbbf24; }
 .strength-label.strong { color: #14B8A6; }
 
-/* ---------- CUSTOM CHECKBOX (Signup terms) ---------- */
+/* ---------- CHECKBOX ---------- */
 .custom-checkbox {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   color: rgba(248, 250, 252, 0.6);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 400 !important;
   cursor: pointer;
-  margin-top: 16px !important;
+  margin-top: 18px !important;
+  line-height: 1.4;
   position: relative;
 }
 
@@ -281,6 +236,7 @@
   justify-content: center;
   transition: 0.15s;
   flex-shrink: 0;
+  margin-top: 1px;
 }
 
 .custom-checkbox input:checked + .checkbox-box {
@@ -301,131 +257,98 @@
   text-decoration: none;
 }
 
-/* ---------- SIGNUP UPLOAD MOCKUP ---------- */
-.mockup-upload-box {
-  border: 2px dashed rgba(20, 184, 166, 0.4);
-  border-radius: 12px;
-  padding: 24px;
-  text-align: center;
-}
-
-.mockup-upload-icon {
-  color: #14B8A6;
-  font-size: 1.5rem;
-  margin-bottom: 6px;
-}
-
-.mockup-upload-text {
-  color: #F8FAFC;
-  font-size: 0.8rem;
-}
-
-/* ---------- RIGHT PANEL (preview) ---------- */
-.split-right {
-  width: 58%;
-  background-color: #F8FAFC;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 60px 70px;
-}
-
-.preview-text h2 {
-  color: #0F172A;
-  font-size: 2.1rem;
-  font-weight: 800;
-  line-height: 1.25;
-  margin-bottom: 12px;
-  max-width: 480px;
-}
-
-.preview-text p {
-  color: rgba(15, 23, 42, 0.55);
-  font-size: 0.95rem;
-  max-width: 440px;
-  margin-bottom: 40px;
-}
-
-.preview-mockup {
-  display: flex;
-  gap: 16px;
-  background-color: #0F172A;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 30px 60px rgba(15, 23, 42, 0.25);
-  max-width: 620px;
-}
-
-.mockup-sidebar {
-  width: 40%;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.mockup-doc-card {
-  background-color: rgba(248, 250, 252, 0.05);
-  border: 1px solid rgba(248, 250, 252, 0.08);
-  border-radius: 10px;
-  padding: 12px;
-}
-
-.mockup-doc-title {
-  color: #F8FAFC;
-  font-size: 0.75rem;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.mockup-doc-line {
-  height: 6px;
-  background-color: rgba(248, 250, 252, 0.15);
-  border-radius: 4px;
-  margin-bottom: 6px;
-}
-
-.mockup-doc-line.short {
-  width: 60%;
-}
-
-.mockup-chat {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  justify-content: flex-end;
-}
-
-.mockup-bubble {
-  padding: 10px 14px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  line-height: 1.4;
-  max-width: 90%;
-}
-
-.mockup-bubble.assistant {
-  background-color: rgba(248, 250, 252, 0.08);
-  color: #F8FAFC;
-  align-self: flex-start;
-}
-
-.mockup-bubble.user {
+/* ---------- BUTTON ---------- */
+.centered-btn {
+  width: 100%;
   background-color: #14B8A6;
-  color: #0F172A;
-  align-self: flex-end;
-  font-weight: 600;
+  color: #06251f;
+  border: none;
+  padding: 13px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  cursor: pointer;
+  margin-top: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: 0.2s;
+  box-shadow: 0 8px 24px -8px rgba(20, 184, 166, 0.5);
 }
 
-/* ---------- RESPONSIVE ---------- */
-@media (max-width: 900px) {
-  .split-container {
-    flex-direction: column;
-  }
-  .split-left, .split-right {
-    width: 100%;
-  }
-  .split-right {
-    display: none;
-  }
+.centered-btn:hover {
+  background-color: #0d9488;
+  box-shadow: 0 8px 28px -6px rgba(20, 184, 166, 0.7);
+}
+
+.centered-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---------- DIVIDER ---------- */
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 22px 0 16px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid rgba(248, 250, 252, 0.1);
+}
+
+.divider span {
+  padding: 0 12px;
+  color: rgba(248, 250, 252, 0.35);
+  font-size: 0.72rem;
+}
+
+/* ---------- SWITCH LINK ---------- */
+.centered-switch {
+  text-align: center;
+  font-size: 0.83rem;
+  color: rgba(248, 250, 252, 0.5);
+  margin-top: 4px;
+}
+
+.centered-switch a {
+  color: #14B8A6;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* ---------- ERROR ---------- */
+.auth-error {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  margin-bottom: 16px;
+}
+
+.auth-inline-link {
+  color: #f87171;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+/* ---------- SPINNER ---------- */
+.spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(6, 37, 31, 0.3);
+  border-top-color: #06251f;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }

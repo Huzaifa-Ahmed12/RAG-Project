@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Eye, EyeOff, Check, X } from "lucide-react";
+import { User, Mail, Lock, Eye, EyeOff, Check, X, ArrowRight } from "lucide-react";
 import "./Auth.css";
 
 const API_BASE = "http://localhost:8000/api";
@@ -82,115 +82,98 @@ function Signup() {
   };
 
   return (
-    <div className="split-container reverse">
-      {/* LEFT — PREVIEW PANEL (swapped side, different content) */}
-      <div className="split-right">
-        <div className="preview-text">
-          <h2>Get started in seconds</h2>
-          <p>Create an account, upload your first PDF, and start asking questions — no setup required.</p>
-        </div>
-
-        <div className="preview-mockup">
-          <div className="mockup-upload-box">
-            <div className="mockup-upload-icon">＋</div>
-            <div className="mockup-upload-text">Drop PDFs here</div>
-          </div>
-          <div className="mockup-sidebar" style={{ marginTop: 14 }}>
-            <div className="mockup-doc-card">
-              <div className="mockup-doc-title">Machine Learning.pdf</div>
-              <div className="mockup-doc-line" />
-              <div className="mockup-doc-line short" />
-            </div>
-          </div>
-        </div>
+    <div className="centered-container">
+      <div className="brand-block">
+        <div className="brand-name brand-name-solid">Cirrus</div>
+        <div className="brand-tagline">Initialize your workspace.</div>
       </div>
 
-      {/* RIGHT — FORM PANEL */}
-      <div className="split-left">
-        <div className="split-form-wrap">
-          <div className="brand-mark">📚 DocMind</div>
-          <h1 className="split-title">Create Account</h1>
-          <p className="split-subtitle">Sign up to start uploading and chatting with your documents</p>
+      <div className="centered-card">
+        {error && <div className="auth-error">{error.message}</div>}
 
-          {error && <div className="auth-error">{error.message}</div>}
-
-          <form onSubmit={handleSignup}>
-            <label>Username</label>
+        <form onSubmit={handleSignup}>
+          <label>Username</label>
+          <div className="input-icon-wrap">
+            <User size={16} className="field-icon" />
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Choose a username"
+              placeholder="Enter username"
               autoFocus
               required
             />
+          </div>
 
-            <label>Email</label>
-            <div className="input-with-icon">
-              <input
-                type="email"
-                value={email}
-                onChange={handleEmailChange}
-                placeholder="your@email.com"
-                className={emailError ? "input-error" : email ? "input-valid" : ""}
-                required
-              />
-              {email && (
-                <span className="input-icon">
-                  {emailError ? <X size={16} color="#f87171" /> : <Check size={16} color="#14B8A6" />}
-                </span>
-              )}
-            </div>
-            {emailError && <div className="field-error">{emailError}</div>}
-
-            <label>Password</label>
-            <div className="password-field">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Create a password"
-                required
-              />
-              <button
-                type="button"
-                className="toggle-password"
-                onClick={() => setShowPassword((prev) => !prev)}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-
-            {password && (
-              <div className="strength-meter">
-                <div className="strength-bars">
-                  <div className={`strength-bar ${strength.score >= 1 ? "active" : ""} ${strength.label === "Weak" ? "weak" : ""}`} />
-                  <div className={`strength-bar ${strength.score >= 2 ? "active" : ""} ${strength.label === "Medium" ? "medium" : ""}`} />
-                  <div className={`strength-bar ${strength.score >= 3 ? "active" : ""} ${strength.label === "Strong" ? "strong" : ""}`} />
-                </div>
-                <span className={`strength-label ${strength.label.toLowerCase()}`}>{strength.label}</span>
-              </div>
+          <label>Email Address</label>
+          <div className="input-icon-wrap">
+            <Mail size={16} className="field-icon" />
+            <input
+              type="email"
+              value={email}
+              onChange={handleEmailChange}
+              placeholder="name@company.com"
+              className={emailError ? "input-error" : email ? "input-valid" : ""}
+              required
+            />
+            {email && (
+              <span className="input-status-icon">
+                {emailError ? <X size={16} color="#f87171" /> : <Check size={16} color="#14B8A6" />}
+              </span>
             )}
+          </div>
+          {emailError && <div className="field-error">{emailError}</div>}
 
-            <label className="custom-checkbox terms-checkbox">
-              <input
-                type="checkbox"
-                checked={agreedToTerms}
-                onChange={(e) => setAgreedToTerms(e.target.checked)}
-              />
-              <span className="checkbox-box"></span>
-              I agree to the <a href="#" onClick={(e) => e.stopPropagation()}>Terms of Service</a>
-            </label>
-
-            <button type="submit" className="split-btn" disabled={loading}>
-              {loading ? <span className="spinner" /> : "Sign Up"}
+          <label>Password</label>
+          <div className="input-icon-wrap">
+            <Lock size={16} className="field-icon" />
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Create a password"
+              required
+            />
+            <button
+              type="button"
+              className="toggle-password"
+              onClick={() => setShowPassword((prev) => !prev)}
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
-          </form>
+          </div>
 
-          <p className="split-switch">
-            Already have an account? <Link to="/login">Log in</Link>
-          </p>
-        </div>
+          {password && (
+            <div className="strength-meter">
+              <div className="strength-bars">
+                <div className={`strength-bar ${strength.score >= 1 ? "active" : ""} ${strength.label === "Weak" ? "weak" : ""}`} />
+                <div className={`strength-bar ${strength.score >= 2 ? "active" : ""} ${strength.label === "Medium" ? "medium" : ""}`} />
+                <div className={`strength-bar ${strength.score >= 3 ? "active" : ""} ${strength.label === "Strong" ? "strong" : ""}`} />
+              </div>
+              <span className={`strength-label ${strength.label.toLowerCase()}`}>{strength.label}</span>
+            </div>
+          )}
+
+          <label className="custom-checkbox terms-checkbox">
+            <input
+              type="checkbox"
+              checked={agreedToTerms}
+              onChange={(e) => setAgreedToTerms(e.target.checked)}
+            />
+            <span className="checkbox-box"></span>
+            I agree to the <a href="#" onClick={(e) => e.stopPropagation()}>Terms of Service</a>
+          </label>
+
+          <button type="submit" className="centered-btn" disabled={loading}>
+            {loading ? <span className="spinner" /> : (
+              <>Sign Up <ArrowRight size={16} /></>
+            )}
+          </button>
+        </form>
+
+        <p className="centered-switch">
+          Already have an account? <Link to="/login">Log in</Link>
+        </p>
       </div>
     </div>
   );

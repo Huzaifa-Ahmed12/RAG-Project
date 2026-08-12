@@ -1,13 +1,10 @@
 import os
-from django.conf import settings
+import tempfile
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from .models import Document, Conversation, Message
 from . import rag_service
-
-UPLOAD_DIR = os.path.join(settings.BASE_DIR, "uploaded_pdfs")
-os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 @api_view(["POST"])
@@ -17,13 +14,18 @@ def upload_pdf(request):
     if not file:
         return Response({"error": "No file provided"}, status=400)
 
-    save_path = os.path.join(UPLOAD_DIR, file.name)
-    with open(save_path, "wb+") as f:
+    # Write to a temporary file just so PDFPlumberLoader can read it —
+    # deleted automatically once processing finishes, nothing persists to disk
+    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
         for chunk in file.chunks():
-            f.write(chunk)
+            tmp.write(chunk)
+        tmp_path = tmp.name
 
-    # Pass the logged-in user so the document is tagged to them
-    doc = rag_service.process_pdf(save_path, file.name, request.user)
+    try:
+        # Pass the logged-in user so the document is tagged to them
+        doc = rag_service.process_pdf(tmp_path, file.name, request.user)
+    finally:
+        os.remove(tmp_path)  # always clean up, even if processing fails
 
     return Response({
         "doc_id": doc.doc_id,
@@ -35,7 +37,6 @@ def upload_pdf(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def list_documents(request):
-    # Only return documents owned by the logged-in user
     docs = Document.objects.filter(owner=request.user).order_by("-uploaded_at")
     return Response([
         {"doc_id": d.doc_id, "filename": d.filename, "summary": d.summary}
@@ -46,7 +47,6 @@ def list_documents(request):
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
 def delete_document(request, doc_id):
-    # Ensure the document actually belongs to this user before deleting
     doc = Document.objects.filter(doc_id=doc_id, owner=request.user).first()
     if not doc:
         return Response({"error": "Document not found"}, status=404)
@@ -70,7 +70,6 @@ def chat(request):
 
     Message.objects.create(conversation=conversation, role="user", content=question)
 
-    # Pass the user so routing/retrieval only searches THEIR documents
     answer, matched_doc_id = rag_service.get_answer(question, request.user)
 
     source_filename = None
@@ -93,7 +92,6 @@ def chat(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_conversations(request):
-    # Only this user's conversations
     conversations = Conversation.objects.filter(owner=request.user).order_by("-created_at")
     return Response([{"id": c.id, "title": c.title} for c in conversations])
 
@@ -101,7 +99,6 @@ def get_conversations(request):
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def get_conversation_messages(request, conversation_id):
-    # Ensure the conversation belongs to this user before returning its messages
     conversation = Conversation.objects.filter(id=conversation_id, owner=request.user).first()
     if not conversation:
         return Response({"error": "Conversation not found"}, status=404)
@@ -120,5 +117,5 @@ def delete_conversation(request, conversation_id):
     if not conversation:
         return Response({"error": "Conversation not found"}, status=404)
 
-    conversation.delete()  # cascades and deletes its messages too
+    conversation.delete()
     return Response({"status": "deleted"})

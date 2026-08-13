@@ -84,7 +84,9 @@ function Signup() {
   return (
     <div className="centered-container">
       <div className="brand-block">
-        <div className="brand-name brand-name-solid">Cirrus</div>
+        <div className="brand-name brand-name-solid">
+          <span className="brand-name-white">CIR</span><span className="brand-accent">RUS</span>
+        </div>
         <div className="brand-tagline">Initialize your workspace.</div>
       </div>
 
@@ -118,7 +120,7 @@ function Signup() {
             />
             {email && (
               <span className="input-status-icon">
-                {emailError ? <X size={16} color="#f87171" /> : <Check size={16} color="#14B8A6" />}
+                {emailError ? <X size={16} color="#f87171" /> : <Check size={16} color="#3964fe" />}
               </span>
             )}
           </div>

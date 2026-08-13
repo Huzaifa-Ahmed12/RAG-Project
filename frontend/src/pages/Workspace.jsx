@@ -403,7 +403,7 @@ function Workspace() {
             </button>
           )}
           <div>
-            <h2>Cirrus AI</h2>
+            <h2><span className="brand-name-white">CIR</span><span className="brand-accent">RUS</span> AI</h2>
             <p>Ask a question — only the relevant document is searched</p>
           </div>
         </div>

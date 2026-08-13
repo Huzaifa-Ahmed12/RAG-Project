@@ -22,15 +22,19 @@
   text-transform: uppercase;
 }
 
+.brand-name-white {
+  color: #F8FAFC;
+}
+
 .brand-name-solid {
-  color: #14B8A6;
+  color: #3964fe;
   text-transform: none;
   letter-spacing: 0.02em;
   font-size: 2rem;
 }
 
 .brand-accent {
-  color: #14B8A6;
+  color: #3964fe;
 }
 
 .brand-tagline {
@@ -45,11 +49,11 @@
 .centered-card {
   width: 100%;
   max-width: 380px;
-  background: linear-gradient(180deg, rgba(20, 184, 166, 0.06), rgba(15, 23, 42, 0) 40%), #0d1526;
-  border: 1px solid rgba(20, 184, 166, 0.25);
+  background: linear-gradient(180deg, rgba(57, 100, 254, 0.06), rgba(15, 23, 42, 0) 40%), #0d1526;
+  border: 1px solid rgba(57, 100, 254, 0.25);
   border-radius: 18px;
   padding: 32px;
-  box-shadow: 0 0 0 1px rgba(20, 184, 166, 0.05), 0 20px 60px -20px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 0 1px rgba(57, 100, 254, 0.05), 0 20px 60px -20px rgba(0, 0, 0, 0.6);
 }
 
 .card-title {
@@ -92,7 +96,7 @@
 
 .forgot-link {
   font-size: 0.75rem;
-  color: #14B8A6;
+  color: #3964fe;
   text-decoration: none;
   font-weight: 600;
 }
@@ -128,8 +132,8 @@
 }
 
 .input-icon-wrap input:focus {
-  border-color: #14B8A6;
-  background-color: rgba(20, 184, 166, 0.05);
+  border-color: #3964fe;
+  background-color: rgba(57, 100, 254, 0.05);
 }
 
 .toggle-password {
@@ -145,7 +149,7 @@
 }
 
 .toggle-password:hover {
-  color: #14B8A6;
+  color: #3964fe;
 }
 
 .input-status-icon {
@@ -160,7 +164,7 @@
 }
 
 .input-valid {
-  border-color: #14B8A6 !important;
+  border-color: #3964fe !important;
 }
 
 .field-error {
@@ -193,7 +197,7 @@
 
 .strength-bar.active.weak { background-color: #f87171; }
 .strength-bar.active.medium { background-color: #fbbf24; }
-.strength-bar.active.strong { background-color: #14B8A6; }
+.strength-bar.active.strong { background-color: #3964fe; }
 
 .strength-label {
   font-size: 0.75rem;
@@ -203,7 +207,7 @@
 
 .strength-label.weak { color: #f87171; }
 .strength-label.medium { color: #fbbf24; }
-.strength-label.strong { color: #14B8A6; }
+.strength-label.strong { color: #3964fe; }
 
 /* ---------- CHECKBOX ---------- */
 .custom-checkbox {
@@ -240,8 +244,8 @@
 }
 
 .custom-checkbox input:checked + .checkbox-box {
-  background-color: #14B8A6;
-  border-color: #14B8A6;
+  background-color: #3964fe;
+  border-color: #3964fe;
 }
 
 .custom-checkbox input:checked + .checkbox-box::after {
@@ -252,7 +256,7 @@
 }
 
 .terms-checkbox a {
-  color: #14B8A6;
+  color: #3964fe;
   font-weight: 600;
   text-decoration: none;
 }
@@ -260,8 +264,8 @@
 /* ---------- BUTTON ---------- */
 .centered-btn {
   width: 100%;
-  background-color: #14B8A6;
-  color: #06251f;
+  background-color: #3964fe;
+  color: #eaf1ff;
   border: none;
   padding: 13px;
   border-radius: 10px;
@@ -274,12 +278,12 @@
   justify-content: center;
   gap: 6px;
   transition: 0.2s;
-  box-shadow: 0 8px 24px -8px rgba(20, 184, 166, 0.5);
+  box-shadow: 0 8px 24px -8px rgba(57, 100, 254, 0.5);
 }
 
 .centered-btn:hover {
-  background-color: #0d9488;
-  box-shadow: 0 8px 28px -6px rgba(20, 184, 166, 0.7);
+  background-color: #2a4fd8;
+  box-shadow: 0 8px 28px -6px rgba(57, 100, 254, 0.7);
 }
 
 .centered-btn:disabled {
@@ -317,7 +321,7 @@
 }
 
 .centered-switch a {
-  color: #14B8A6;
+  color: #3964fe;
   font-weight: 600;
   text-decoration: none;
 }
@@ -343,8 +347,8 @@
   display: inline-block;
   width: 18px;
   height: 18px;
-  border: 3px solid rgba(6, 37, 31, 0.3);
-  border-top-color: #06251f;
+  border: 3px solid rgba(57, 100, 254, 0.3);
+  border-top-color: #3964fe;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }

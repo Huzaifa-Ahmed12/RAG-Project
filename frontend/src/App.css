@@ -13,7 +13,7 @@
 .sidebar {
   width: 280px;
   background: #0d1526;
-  border-right: 1px solid rgba(20, 184, 166, 0.15);
+  border-right: 1px solid rgba(57, 100, 254, 0.15);
   padding: 20px 16px;
   display: flex;
   flex-direction: column;
@@ -44,7 +44,7 @@
 }
 
 .brand-accent {
-  color: #14B8A6;
+  color: #3964fe;
 }
 
 .sidebar-close-btn {
@@ -65,8 +65,8 @@
 }
 
 .icon-btn:hover {
-  border-color: #14B8A6;
-  color: #14B8A6;
+  border-color: #3964fe;
+  color: #3964fe;
 }
 
 .sidebar-subtitle {
@@ -77,7 +77,7 @@
 
 /* ---------- UPLOAD BOX ---------- */
 .upload-box {
-  border: 1.5px dashed rgba(20, 184, 166, 0.35);
+  border: 1.5px dashed rgba(57, 100, 254, 0.35);
   border-radius: 12px;
   padding: 18px 12px;
   text-align: center;
@@ -86,18 +86,18 @@
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  background: rgba(20, 184, 166, 0.04);
+  background: rgba(57, 100, 254, 0.04);
   transition: 0.15s;
   margin-bottom: 10px;
 }
 
 .upload-box:hover {
-  border-color: #14B8A6;
-  background: rgba(20, 184, 166, 0.08);
+  border-color: #3964fe;
+  background: rgba(57, 100, 254, 0.08);
 }
 
 .upload-icon {
-  color: #14B8A6;
+  color: #3964fe;
 }
 
 .upload-box p {
@@ -107,7 +107,7 @@
 }
 
 .upload-box span {
-  color: #14B8A6;
+  color: #3964fe;
   font-weight: 600;
   text-decoration: underline;
 }
@@ -147,8 +147,8 @@
 }
 
 .process-btn {
-  background: #14B8A6;
-  color: #06251f;
+  background: #3964fe;
+  color: #eaf1ff;
   border: none;
   border-radius: 8px;
   padding: 9px;
@@ -173,7 +173,7 @@
 
 .progress-bar-inner {
   height: 100%;
-  background: #14B8A6;
+  background: #3964fe;
   transition: width 0.2s;
 }
 
@@ -191,9 +191,9 @@
 }
 
 .new-chat-btn {
-  background: rgba(20, 184, 166, 0.12);
-  border: 1px solid rgba(20, 184, 166, 0.3);
-  color: #14B8A6;
+  background: rgba(57, 100, 254, 0.12);
+  border: 1px solid rgba(57, 100, 254, 0.3);
+  color: #3964fe;
   font-size: 0.68rem;
   font-weight: 700;
   border-radius: 6px;
@@ -236,8 +236,8 @@
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: rgba(20, 184, 166, 0.15);
-  color: #14B8A6;
+  background: rgba(57, 100, 254, 0.15);
+  color: #3964fe;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -260,7 +260,7 @@
 
 .doc-status {
   font-size: 0.65rem;
-  color: #14B8A6;
+  color: #3964fe;
 }
 
 .doc-delete-btn {
@@ -286,7 +286,7 @@
 
 .conversation-item-wrap.active,
 .conversation-item-wrap:hover {
-  background: rgba(20, 184, 166, 0.08);
+  background: rgba(57, 100, 254, 0.08);
 }
 
 .conversation-item {
@@ -356,7 +356,7 @@
 .chat-header h2 {
   margin: 0;
   font-size: 1.1rem;
-  color: #14B8A6;
+  color: #3964fe;
 }
 
 .chat-header p {
@@ -405,8 +405,8 @@
 }
 
 .avatar.assistant {
-  background: rgba(20, 184, 166, 0.15);
-  color: #14B8A6;
+  background: rgba(57, 100, 254, 0.15);
+  color: #3964fe;
 }
 
 .avatar.user {
@@ -425,16 +425,16 @@
 }
 
 .message-row.user .message-bubble {
-  background: rgba(20, 184, 166, 0.12);
-  border-color: rgba(20, 184, 166, 0.25);
+  background: rgba(57, 100, 254, 0.12);
+  border-color: rgba(57, 100, 254, 0.25);
 }
 
 .message-bubble-upload {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #14B8A6;
-  border-color: rgba(20, 184, 166, 0.25);
+  color: #3964fe;
+  border-color: rgba(57, 100, 254, 0.25);
 }
 
 .upload-msg-icon {
@@ -459,9 +459,9 @@
 }
 
 .suggestion-chip {
-  background: rgba(20, 184, 166, 0.08);
-  border: 1px solid rgba(20, 184, 166, 0.25);
-  color: #14B8A6;
+  background: rgba(57, 100, 254, 0.08);
+  border: 1px solid rgba(57, 100, 254, 0.25);
+  color: #3964fe;
   border-radius: 20px;
   padding: 6px 12px;
   font-size: 0.75rem;
@@ -474,7 +474,7 @@
 }
 
 .suggestion-chip:hover {
-  background: rgba(20, 184, 166, 0.18);
+  background: rgba(57, 100, 254, 0.18);
 }
 
 /* ---------- TYPING INDICATOR ---------- */
@@ -489,7 +489,7 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #14B8A6;
+  background: #3964fe;
   animation: typing-bounce 1.2s infinite ease-in-out;
 }
 
@@ -528,8 +528,8 @@
 }
 
 .pill-btn:hover {
-  border-color: #14B8A6;
-  color: #14B8A6;
+  border-color: #3964fe;
+  color: #3964fe;
 }
 
 .input-row {
@@ -550,7 +550,7 @@
 }
 
 .input-row input:focus {
-  border-color: #14B8A6;
+  border-color: #3964fe;
 }
 
 .input-row input::placeholder {
@@ -558,8 +558,8 @@
 }
 
 .send-btn {
-  background: #14B8A6;
-  color: #06251f;
+  background: #3964fe;
+  color: #eaf1ff;
   border: none;
   border-radius: 10px;
   width: 42px;
@@ -573,7 +573,7 @@
 }
 
 .send-btn:hover {
-  background: #0d9488;
+  background: #2a4fd8;
 }
 
 /* ---------- MODALS ---------- */
@@ -589,7 +589,7 @@
 
 .modal-card {
   background: #0d1526;
-  border: 1px solid rgba(20, 184, 166, 0.25);
+  border: 1px solid rgba(57, 100, 254, 0.25);
   border-radius: 14px;
   padding: 24px;
   width: 320px;

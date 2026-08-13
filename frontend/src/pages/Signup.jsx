@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { User, Mail, Lock, Eye, EyeOff, Check, X, ArrowRight } from "lucide-react";
 import "./Auth.css";
 
-const API_BASE = "http://localhost:8000/api";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000/api";
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function getPasswordStrength(password) {
@@ -25,7 +25,6 @@ function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [error, setError] = useState(null);
   const [emailError, setEmailError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -49,10 +48,6 @@ function Signup() {
 
     if (!EMAIL_REGEX.test(email)) {
       setEmailError("Enter a valid email address");
-      return;
-    }
-    if (!agreedToTerms) {
-      setError({ message: "Please agree to the Terms of Service to continue." });
       return;
     }
 
@@ -84,13 +79,16 @@ function Signup() {
   return (
     <div className="centered-container">
       <div className="brand-block">
-        <div className="brand-name brand-name-solid">
-          <span className="brand-name-white">CIR</span><span className="brand-accent">RUS</span>
+        <div className="brand-name">
+          CIR<span className="brand-accent">RUS</span>
         </div>
-        <div className="brand-tagline">Initialize your workspace.</div>
+        <div className="brand-tagline">INTELLIGENT VELOCITY</div>
       </div>
 
       <div className="centered-card">
+        <h2 className="card-title">Create an account</h2>
+        <p className="card-subtitle">Get started with your command center.</p>
+
         {error && <div className="auth-error">{error.message}</div>}
 
         <form onSubmit={handleSignup}>
@@ -120,7 +118,7 @@ function Signup() {
             />
             {email && (
               <span className="input-status-icon">
-                {emailError ? <X size={16} color="#f87171" /> : <Check size={16} color="#3964fe" />}
+                {emailError ? <X size={16} color="#ef4444" /> : <Check size={16} color="#00bba7" />}
               </span>
             )}
           </div>
@@ -155,16 +153,6 @@ function Signup() {
               <span className={`strength-label ${strength.label.toLowerCase()}`}>{strength.label}</span>
             </div>
           )}
-
-          <label className="custom-checkbox terms-checkbox">
-            <input
-              type="checkbox"
-              checked={agreedToTerms}
-              onChange={(e) => setAgreedToTerms(e.target.checked)}
-            />
-            <span className="checkbox-box"></span>
-            I agree to the <a href="#" onClick={(e) => e.stopPropagation()}>Terms of Service</a>
-          </label>
 
           <button type="submit" className="centered-btn" disabled={loading}>
             {loading ? <span className="spinner" /> : (

@@ -61,25 +61,27 @@ def process_pdf(pdf_path, filename, user):
     chunks = load_and_chunk(pdf_path, doc_id)
     summary = generate_summary(chunks)
 
+    # Batch-encode all chunks in ONE call instead of one-by-one — much faster
+    texts = [c.page_content for c in chunks]
+    embeddings = embedding_model.encode(texts, batch_size=32, show_progress_bar=False)
+
     with transaction.atomic():
         document = Document.objects.create(
             doc_id=doc_id, filename=filename, summary=summary, owner=user
         )
-
 
         chunk_objects = [
             Chunk(
                 document=document,
                 owner=user,
                 content=c.page_content,
-                embedding=embed_text(c.page_content),
+                embedding=embeddings[i].tolist(),
             )
-            for c in chunks
+            for i, c in enumerate(chunks)
         ]
         Chunk.objects.bulk_create(chunk_objects)
 
     return document
-
 
 def route_query(query, user):
     documents = Document.objects.filter(owner=user)

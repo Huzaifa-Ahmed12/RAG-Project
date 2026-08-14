@@ -7,6 +7,8 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_mistralai import ChatMistralAI
 from langchain_core.prompts import ChatPromptTemplate
 from .models import Document, Chunk
+from django.db import transaction
+
 
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 llm = ChatMistralAI(model="mistral-small-2506")
@@ -59,20 +61,22 @@ def process_pdf(pdf_path, filename, user):
     chunks = load_and_chunk(pdf_path, doc_id)
     summary = generate_summary(chunks)
 
-    document = Document.objects.create(
-        doc_id=doc_id, filename=filename, summary=summary, owner=user
-    )
-
-    chunk_objects = [
-        Chunk(
-            document=document,
-            owner=user,
-            content=c.page_content,
-            embedding=embed_text(c.page_content),
+    with transaction.atomic():
+        document = Document.objects.create(
+            doc_id=doc_id, filename=filename, summary=summary, owner=user
         )
-        for c in chunks
-    ]
-    Chunk.objects.bulk_create(chunk_objects)
+
+
+        chunk_objects = [
+            Chunk(
+                document=document,
+                owner=user,
+                content=c.page_content,
+                embedding=embed_text(c.page_content),
+            )
+            for c in chunks
+        ]
+        Chunk.objects.bulk_create(chunk_objects)
 
     return document
 
